@@ -2,16 +2,17 @@
 
   // all the settings, initialized with their default value
   var cache = {
-      'show-disabled': false,
-      'only-deck': false,
-      'show-onesies': false,
-      'show-cacherefresh': false,
-      'display-columns': 1,
-      'core-sets': 3,
-      'show-suggestions': 3,
-      'buttons-behavior': 'cumulative',
-      'sort-order': 'type',
-            'check-rotation': true
+    'show-disabled': false,
+    'only-deck': false,
+    'ignore-limited-copies': false,
+    'show-onesies': false,
+    'show-cacherefresh': false,
+    'display-columns': 1,
+    'core-sets': 3,
+    'show-suggestions': 3,
+    'buttons-behavior': 'cumulative',
+    'sort-order': 'type',
+    'check-rotation': true
   };
 
   settings.load = function load() {

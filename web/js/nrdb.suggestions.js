@@ -107,15 +107,21 @@
   suggestions.div = function(card) {
     var faction = card.faction_code;
     var influ = "";
-    for (var i = 0; i < card.factioncost; i++)
+    for (var i = 0; i < card.factioncost; i++) {
       influ += "●";
+    }
+
+    var pref_extended_maxqty = card.maxqty;
+    if (NRDB.settings && NRDB.settings.getItem("ignore-limited-copies")) { // if the setting is enabled,
+      pref_extended_maxqty = Math.max(pref_extended_maxqty, 3); // increase allowed copies up to 3.
+    }
 
     var radios = '';
-    for (var i = 0; i <= card.maxqty; i++) {
+    for (var i = 0; i <= pref_extended_maxqty; i++) {
       radios += '<label class="btn btn-xs btn-default'
-          + (i == card.indeck ? ' active' : '')
-          + '"><input type="radio" name="qty-' + card.code
-          + '" value="' + i + '">' + i + '</label>';
+        + (i == card.indeck ? ' active' : '')
+        + '"><input type="radio" name="qty-' + card.code
+        + '" value="' + i + '">' + i + '</label>';
     }
 
     var imgsrc = card.faction_code.substr(0,7) === "neutral" ? "" : '<img data-src="'

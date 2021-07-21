@@ -34,13 +34,18 @@
     var qtyelt = modal.find('.modal-qty');
     if(qtyelt && typeof Filters != "undefined") {
 
-      var qty = '';
-        for(var i=0; i<=card.maxqty; i++) {
-          qty += '<label class="btn btn-default"><input type="radio" name="qty" value="'+i+'">'+i+'</label>';
-        }
-        qtyelt.html(qty);
+      var pref_extended_maxqty = card.maxqty;
+      if (NRDB.settings && NRDB.settings.getItem("ignore-limited-copies")) { // if the setting is enabled,
+        pref_extended_maxqty = Math.max(pref_extended_maxqty, 3); // increase allowed copies up to 3.
+      }
 
-        qtyelt.find('label').each(function (index, element) {
+      var qty = '';
+      for(var i=0; i<=pref_extended_maxqty; i++) {
+        qty += '<label class="btn btn-default"><input type="radio" name="qty" value="'+i+'">'+i+'</label>';
+      }
+      qtyelt.html(qty);
+
+      qtyelt.find('label').each(function (index, element) {
         if(index == card.indeck) $(element).addClass('active');
         else $(element).removeClass('active');
       });

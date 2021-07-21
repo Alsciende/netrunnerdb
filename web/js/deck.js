@@ -133,6 +133,9 @@ Promise.all([NRDB.data.promise, NRDB.settings.promise]).then(function() {
     case 'only-deck':
       refresh_collection();
       break;
+    case 'ignore-limited-copies':
+      refresh_collection(true);
+      break;
     case 'show-suggestions':
       NRDB.suggestions.show();
       break;
@@ -718,18 +721,30 @@ function update_mwl(event) {
 
 function build_div(record) {
   var influ = "";
-  for (var i = 0; i < record.faction_cost; i++)
+  for (var i = 0; i < record.faction_cost; i++) {
     influ += "●";
+  }
+
+  /**
+   * This controls the true value of how many copies of a card can be in a deck.
+   * maxqty is normally 3, and is X for cards with text "limit X per deck".
+   * However, if somebody wants to use an illegal number of copies for casual play,
+   * a setting in the builder can increase this up to 3.
+   */
+  var pref_extended_maxqty = record.maxqty;
+  if (NRDB.settings && NRDB.settings.getItem("ignore-limited-copies")) { // if the setting is enabled,
+    pref_extended_maxqty = Math.max(pref_extended_maxqty, 3); // increase allowed copies up to 3.
+  }
 
   var radios = '';
-  for (var i = 0; i <= record.maxqty; i++) {
-    if(i && !(i%4)) {
+  for (var i = 0; i <= pref_extended_maxqty; i++) {
+    if (i && !(i % 4)) {
       radios += '<br>';
     }
     radios += '<label class="btn btn-xs btn-default'
-        + (i == record.indeck ? ' active' : '')
-        + '"><input type="radio" name="qty-' + record.code
-        + '" value="' + i + '">' + i + '</label>';
+      + (i == record.indeck ? ' active' : '')
+      + '"><input type="radio" name="qty-' + record.code
+      + '" value="' + i + '">' + i + '</label>';
   }
 
   var div = '';
@@ -805,7 +820,9 @@ function is_card_usable(record) {
   return true;
 }
 
-function update_filtered() {
+function update_filtered(forceBuild) {
+  if (!forceBuild) forceBuild = false; // default parameter value
+
   $('#collection-table').empty();
   $('#collection-grid').empty();
 
@@ -836,8 +853,10 @@ function update_filtered() {
       return;
 
     var index = card.code;
-    var row = (CardDivs[display_columns][index] || (CardDivs[display_columns][index] = build_div(card)))
-        .data("index", card.code);
+    if (!CardDivs[display_columns][index] || forceBuild) {
+      CardDivs[display_columns][index] = build_div(card);
+    }
+    var row = CardDivs[display_columns][index].data("index", card.code);
     row.find('input[name="qty-' + card.code + '"]').each(
         function(i, element) {
           if ($(element).val() == card.indeck)
